@@ -12,15 +12,34 @@ using std::vector;
 #include <Math/mathematical functions.h>
 using Math::MathematicalFunctions::BernsteinTriangle;
 
+#include <StopWatch.h>
 
 double determine_win_posibility(double p1, double p2, int n1, int n2, int turns);
 double determine_win_posibility_worker(int n1, int n2, int turns);
 
 int main()
 {
+	StopWatch sw("ms");
+	double t;
+
+	sw.push();
+	wcout << determine_win_posibility(1.0/(2*3*3)/* gaunt */, (double)(2*2*5)/(3*3*6)/* marine */, 30, 10, 5) << endl;
+	wcout << determine_win_posibility((double)(2*2*5)/(3*3*6)/* marine */, 1.0/(2*3*3)/* gaunt */, 10, 30, 5) << endl;
+	t = sw.pop();
+	std::cout << "Elapsed time: " << t << sw.getUnit() << "\n" << endl;
+
+	sw.push();
 	wcout << determine_win_posibility(1.0/(2*3*3)/* gaunt */, (double)(2*2*5)/(3*3*6)/* marine */, 30, 10, 6) << endl;
 	wcout << determine_win_posibility((double)(2*2*5)/(3*3*6)/* marine */, 1.0/(2*3*3)/* gaunt */, 10, 30, 6) << endl;
-	
+	t = sw.pop();
+	std::cout << "Elapsed time: " << t << sw.getUnit() << "\n" << endl;
+
+	sw.push();
+	wcout << determine_win_posibility(1.0/(2*3*3)/* gaunt */, (double)(2*2*5)/(3*3*6)/* marine */, 30, 10, 7) << endl;
+	wcout << determine_win_posibility((double)(2*2*5)/(3*3*6)/* marine */, 1.0/(2*3*3)/* gaunt */, 10, 30, 7) << endl;
+	t = sw.pop();
+	std::cout << "Elapsed time: " << t << sw.getUnit() << "\n" << endl;
+
 	system("PAUSE");
 	return 0;
 } // end function main
