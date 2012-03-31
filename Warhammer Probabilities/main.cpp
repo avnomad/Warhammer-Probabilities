@@ -9,13 +9,15 @@ using std::pow;
 #include <vector>
 using std::vector;
 
+#include <algorithm>
+using std::swap;
+
 #include <Math/mathematical functions.h>
 using Math::MathematicalFunctions::BernsteinTriangle;
 
 #include <StopWatch.h>
 
-double determine_win_posibility(double p1, double p2, int n1, int n2, int turns);
-double determine_win_posibility_worker(int n1, int n2, int turns);
+double determine_win_posibility(double p1, double p2, unsigned nModels1, unsigned nModels2, unsigned turns);
 
 int main()
 {
@@ -59,20 +61,15 @@ int main()
  *	ignore:	extra attack from charge.
  */
 
-BernsteinTriangle *triangle1;
-BernsteinTriangle *triangle2;
-vector<vector<double>> baseCases;	// will hold the possibility to win now for each (n1,n2) pair.
-
-double determine_win_posibility(double p1, double p2, int nModels1, int nModels2, int turns)	// not thread safe!
+double determine_win_posibility(double p1, double p2, unsigned nModels1, unsigned nModels2, unsigned turns)
 {
+	if(nModels1 == 0) return 0.0;	// if there are no attackers, attackers can't win.
+	if(nModels2 == 0) return 1.0;	// if there are no defenders, attackers can't loose.
+
 	BernsteinTriangle bernsteinValues1(p1,nModels1);
 	BernsteinTriangle bernsteinValues2(p2,nModels2);
 
-	triangle1 = &bernsteinValues1;
-	triangle2 = &bernsteinValues2;
-
-	if(nModels1 == 0) return 0.0;	// if there are no attackers, attackers can't win.
-	if(nModels2 == 0) return 1.0;	// if there are no defenders, attackers can't loose.
+	vector<vector<double>> baseCases;	// will hold the possibility to win now for each (n1,n2) pair.
 		
 	// precompute base case determine_win_posibility_worker(n1,n2,1) for each (n1,n2) pair.
 	baseCases.resize(nModels1+1);
@@ -91,28 +88,47 @@ double determine_win_posibility(double p1, double p2, int nModels1, int nModels2
 		} // end for
 	} // end for
 
-	return determine_win_posibility_worker(nModels1,nModels2,turns);
-} // end function determine_win_posibility
+	// allocate space for one turn
+	vector<vector<double>> turnA;
+	turnA.resize(baseCases.size());
+	for(auto n1 = 1u ; n1 < turnA.size() ; n1++)
+		turnA[n1].resize(baseCases[n1].size());
+	// allocate space for another turn
+	vector<vector<double>> turnB;
+	turnB.resize(baseCases.size());
+	for(auto n1 = 1u ; n1 < turnB.size() ; n1++)
+		turnB[n1].resize(baseCases[n1].size());
 
+	vector<vector<double>> *oldTurn = &turnA;	// will be used to swap old and new vectors
+	vector<vector<double>> *newTurn = &turnB;
+	(*oldTurn) = baseCases;
 
-double determine_win_posibility_worker(int n1, int n2, int turns)
-{
-	int i, j;
-	double sum = 0;
-	
-	// possibility to win = possibility to win later...
-	if(turns>1)	// if not last turn of game
+	for(auto t = 2u ; t <= turns ; t++)
 	{
-		// i: units of type 2 that will die
-		// j: units of type 1 that will die
-		for(i = 0 ; i<n2 && i<=n1 ; i++)	// at least 1 unit of type 2 survives and no more than all attacks succeed
-	    	for(j = 0 ; j<n1 && j<=n2 ; j++)	// at least 1 unit of type 1 survives and no more than all attacks succeed
-				sum += (*triangle1)(n1,i)	// possibility exactly i unit 1 attacks succeed...
-					* (*triangle2)(n2,j)	// ...and exactly j unit 2 attacks succeed...
-					* determine_win_posibility_worker(n1-j, n2-i, turns-1);	// ...and unit 1 defeats unit 2 later but not before game ends.
-	} // end if
-	// ... + possibility to win now
-	sum += baseCases[n1][n2];
+		for(auto n1 = 1u ; n1 < baseCases.size() ; n1++)
+		{
+			for(auto n2 = 1u ; n2 < baseCases[n1].size() ; n2++)
+			{
+				double sum = 0;
+				// possibility to win = possibility to win later...
 
-	return sum;
-} // end function determine_win_posibility_worker
+				// i: units of type 2 that will die
+				// j: units of type 1 that will die
+				for(auto i = 0u ; i<n2 && i<=n1 ; i++)	// at least 1 unit of type 2 survives and no more than all attacks succeed
+	    			for(auto j = 0u ; j<n1 && j<=n2 ; j++)	// at least 1 unit of type 1 survives and no more than all attacks succeed
+						sum += bernsteinValues1(n1,i)	// possibility exactly i unit 1 attacks succeed...
+							* bernsteinValues2(n2,j)	// ...and exactly j unit 2 attacks succeed...
+							* (*oldTurn)[n1-j][n2-i];	// ...and unit 1 defeats unit 2 later but not before game ends.
+
+				// ... + possibility to win now
+				sum += baseCases[n1][n2];
+
+				(*newTurn)[n1][n2] = sum;
+			} // end for
+		} // end for
+
+		swap(oldTurn,newTurn);
+	} // end for
+
+	return (*oldTurn)[nModels1][nModels2];
+} // end function determine_win_posibility
