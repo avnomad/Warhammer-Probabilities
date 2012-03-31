@@ -1,0 +1,13 @@
+changeset df617dadf27deb8e406359d09ea1cc5eaaa5cfae
+
+0.138707
+2.38734e-005
+Elapsed time: 0.719607ms
+
+0.241347
+0.000736033
+Elapsed time: 0.66055ms
+
+0.346571
+0.00557706
+Elapsed time: 0.757841ms

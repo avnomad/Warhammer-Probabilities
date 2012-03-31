@@ -1,0 +1,13 @@
+changeset 72dcb082acce17c47b0e6a36094c90c290b0a0ae
+
+0.138707
+2.38734e-005
+Elapsed time: 0.565991ms
+
+0.241347
+0.000736033
+Elapsed time: 0.52844ms
+
+0.346571
+0.00557706
+Elapsed time: 0.625389ms
