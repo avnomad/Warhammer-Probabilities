@@ -7,10 +7,11 @@ using std::endl;
 using std::pow;
 
 #include <Math/mathematical functions.h>
-using Math::MathematicalFunctions::binomialCoefficient;
+using Math::MathematicalFunctions::BernsteinTriangle;
 
 
 double determine_win_posibility(double p1, double p2, int n1, int n2, int turns);
+double determine_win_posibility_worker(int n1, int n2, int turns);
 
 int main()
 {
@@ -36,30 +37,41 @@ int main()
  *	ignore:	extra attack from charge.
  */
 
+BernsteinTriangle *triangle1;
+BernsteinTriangle *triangle2;
+
 double determine_win_posibility(double p1, double p2, int n1, int n2, int turns)
 {
+	BernsteinTriangle bernsteinTriangle1(p1,n1);
+	BernsteinTriangle bernsteinTriangle2(p2,n2);
+
+	triangle1 = &bernsteinTriangle1;
+	triangle2 = &bernsteinTriangle2;
+
+	return determine_win_posibility_worker(n1,n2,turns);
+} // end function determine_win_posibility
+
+
+double determine_win_posibility_worker(int n1, int n2, int turns)
+{
 	int i, j;
-	double sum, q1, q2;
-	
-	sum = 0;
-	q1 = 1 - p1;
-	q2 = 1 - p2;
+	double sum = 0;
 	
 	// possibility to win = possibility to win later...
 	if(turns>1)	// if not last turn of game
 	{
 		// i: units of type 2 that will die
 		// j: units of type 1 that will die
-		for(i=0;i<n2 && i<=n1;i++)	// at least 1 unit of type 2 survives and no more than all attacks succeed
-	    	for(j=0;j<n1 && j<=n2;j++)	// at least 1 unit of type 1 survives and no more than all attacks succeed
-	    	    sum += binomialCoefficient(n1,i) * pow(p1,(int)i) * pow(q1,(int)(n1-i))	// possibility exactly i unit 1 attacks succeed...
-					* binomialCoefficient(n2,j) * pow(p2,(int)j) * pow(q2,(int)(n2-j))	// ...and exactly j unit 2 attacks succeed...
-					* determine_win_posibility(p1, p2, n1-j, n2-i, turns-1);	// ...and unit 1 defeats unit 2 later but not before game ends.
+		for(i = 0 ; i<n2 && i<=n1 ; i++)	// at least 1 unit of type 2 survives and no more than all attacks succeed
+	    	for(j = 0 ; j<n1 && j<=n2 ; j++)	// at least 1 unit of type 1 survives and no more than all attacks succeed
+				sum += (*triangle1)(n1,i)	// possibility exactly i unit 1 attacks succeed...
+					* (*triangle2)(n2,j)	// ...and exactly j unit 2 attacks succeed...
+					* determine_win_posibility_worker(n1-j, n2-i, turns-1);	// ...and unit 1 defeats unit 2 later but not before game ends.
 	} // end if
 	// ... + possibility to win now
-	for(i=n2;i<=n1;i++)	// at least enough attacks to kill all enemy models need to succeed.
-		for(j=0;j<n1 && j<=n2;j++)	// a least 1 model of 1st unit must survive.
-	    	sum += binomialCoefficient(n1,i) * pow(p1,(int)i) * pow(q1,(int)(n1-i))	// possibility exactly i unit 1 attacks succeed...
-				* binomialCoefficient(n2,j) * pow(p2,(int)j) * pow(q2,(int)(n2-j));	// ...and exactly j unit 2 attacks succeed.
+	for(i = n2 ; i<=n1 ; i++)	// at least enough attacks to kill all enemy models need to succeed.
+		for(j = 0; j<n1 && j<=n2 ; j++)	// a least 1 model of 1st unit must survive.
+	    	sum += (*triangle1)(n1,i)	// possibility exactly i unit 1 attacks succeed...
+				* (*triangle2)(n2,j);	// ...and exactly j unit 2 attacks succeed.
 	return sum;
-} // end function determine_win_posibility
+} // end function determine_win_posibility_worker
