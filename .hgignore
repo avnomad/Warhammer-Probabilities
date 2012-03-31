@@ -1,0 +1,8 @@
+syntax: regexp
+Debug/*
+Release/*
+ipch/*
+syntax: glob
+Warhammer Probabilities.opensdf
+Warhammer Probabilities.sdf
+Warhammer Probabilities.suo
