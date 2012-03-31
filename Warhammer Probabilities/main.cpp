@@ -47,6 +47,26 @@ int main()
 } // end function main
 
 
+inline double worker(unsigned n1, unsigned n2, const BernsteinTriangle &bernsteinValues1, const BernsteinTriangle &bernsteinValues2, const vector<vector<double>> &baseCases, const vector<vector<double>> &oldTurn)
+{
+	double sum = 0;
+	// possibility to win = possibility to win later...
+
+	// i: units of type 2 that will die
+	// j: units of type 1 that will die
+	for(auto i = 0u ; i<n2 && i<=n1 ; i++)	// at least 1 unit of type 2 survives and no more than all attacks succeed
+	    for(auto j = 0u ; j<n1 && j<=n2 ; j++)	// at least 1 unit of type 1 survives and no more than all attacks succeed
+			sum += bernsteinValues1(n1,i)	// possibility exactly i unit 1 attacks succeed...
+				* bernsteinValues2(n2,j)	// ...and exactly j unit 2 attacks succeed...
+				* oldTurn[n1-j][n2-i];	// ...and unit 1 defeats unit 2 later but not before game ends.
+
+	// ... + possibility to win now
+	sum += baseCases[n1][n2];
+
+	return sum;
+} // end function worker
+
+
 /*	return: possibility unit 1 deffeats unit 2 before game ends.
  *	p1: probability an attack from a unit from 1st group will kill a unit of the 2nd group
  *	p2: probability an attack from a unit from 2nd group will kill a unit of the 1st group
@@ -101,34 +121,20 @@ double determine_win_posibility(double p1, double p2, unsigned nModels1, unsigne
 
 	vector<vector<double>> *oldTurn = &turnA;	// will be used to swap old and new vectors
 	vector<vector<double>> *newTurn = &turnB;
-	(*oldTurn) = baseCases;
 
-	for(auto t = 2u ; t <= turns ; t++)
+	if(turns > 2)
 	{
 		for(auto n1 = 1u ; n1 < baseCases.size() ; n1++)
-		{
 			for(auto n2 = 1u ; n2 < baseCases[n1].size() ; n2++)
-			{
-				double sum = 0;
-				// possibility to win = possibility to win later...
-
-				// i: units of type 2 that will die
-				// j: units of type 1 that will die
-				for(auto i = 0u ; i<n2 && i<=n1 ; i++)	// at least 1 unit of type 2 survives and no more than all attacks succeed
-	    			for(auto j = 0u ; j<n1 && j<=n2 ; j++)	// at least 1 unit of type 1 survives and no more than all attacks succeed
-						sum += bernsteinValues1(n1,i)	// possibility exactly i unit 1 attacks succeed...
-							* bernsteinValues2(n2,j)	// ...and exactly j unit 2 attacks succeed...
-							* (*oldTurn)[n1-j][n2-i];	// ...and unit 1 defeats unit 2 later but not before game ends.
-
-				// ... + possibility to win now
-				sum += baseCases[n1][n2];
-
-				(*newTurn)[n1][n2] = sum;
-			} // end for
-		} // end for
-
+				(*newTurn)[n1][n2] = worker(n1,n2,bernsteinValues1,bernsteinValues2,baseCases,baseCases/**/);
+	} // end if
+	for(auto t = 3u ; t < turns ; t++)
+	{
 		swap(oldTurn,newTurn);
+		for(auto n1 = 1u ; n1 < baseCases.size() ; n1++)
+			for(auto n2 = 1u ; n2 < baseCases[n1].size() ; n2++)
+				(*newTurn)[n1][n2] = worker(n1,n2,bernsteinValues1,bernsteinValues2,baseCases,*oldTurn);
 	} // end for
 
-	return (*oldTurn)[nModels1][nModels2];
+	return worker(nModels1,nModels2,bernsteinValues1,bernsteinValues2,baseCases,*newTurn);
 } // end function determine_win_posibility
