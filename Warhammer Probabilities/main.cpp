@@ -1,3 +1,21 @@
+//	Copyright (C) 2007, 2012 Vaptistis Anogeianakis <el05208@mail.ntua.gr>
+/*
+ *	This file is part of Warhammer Probabilities.
+ *
+ *	Warhammer Probabilities is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	Warhammer Probabilities is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with Warhammer Probabilities.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <iostream>
 using std::wcin;
 using std::wcout;
@@ -67,7 +85,7 @@ inline double worker(unsigned n1, unsigned n2, const BernsteinTriangle &bernstei
 } // end function worker
 
 
-/*	return: possibility unit 1 deffeats unit 2 before game ends.
+/*	return: possibility unit 1 defeats unit 2 before game ends.
  *	p1: probability an attack from a unit from 1st group will kill a unit of the 2nd group
  *	p2: probability an attack from a unit from 2nd group will kill a unit of the 1st group
  *	n1: units of type 1
@@ -75,7 +93,7 @@ inline double worker(unsigned n1, unsigned n2, const BernsteinTriangle &bernstei
  *	assume: each unit has exactly 1 attack per turn.
  *	assume: all bases touch all bases (all attacks can harm any enemy unit)
  *	assume: all units have same initiative (attack simultaneously. all attacks made before models removed)
- *	assume: close combat begins at 1st turn and no shouting preceeds it.
+ *	assume: close combat begins at 1st turn and no shooting precedes it.
  *	This refers to close combat (both players attack in every turn)
  *	Each attack is independent of all others.
  *	ignore:	extra attack from charge.
